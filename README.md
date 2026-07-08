@@ -54,3 +54,38 @@ Principais funcionalidades:
 Este projeto foi desenvolvido com o objetivo de demonstrar a aplicação prática de Inteligência Artificial, automação de processos e integração entre sistemas para apoiar áreas de Recursos Humanos, recrutamento e seleção.
 
 Além da automação operacional, a solução busca oferecer uma experiência mais ágil tanto para candidatos quanto para recrutadores, mantendo uma arquitetura modular preparada para futuras evoluções.
+
+## 🏗️ Arquitetura Geral
+
+O ATS Inteligente foi projetado de forma modular, permitindo que diferentes fluxos de automação trabalhem de maneira independente, mas integrados através de uma arquitetura baseada em Inteligência Artificial, banco de dados centralizado e automações desenvolvidas em n8n.
+
+Atualmente a plataforma é composta por dois módulos principais:
+
+### 📄 ATS CV Evaluation
+
+Responsável pela avaliação inteligente de currículos utilizando múltiplos agentes especializados.
+
+Fluxo resumido:
+
+Currículo (PDF)
+→ Extração de texto
+→ Agentes de IA
+→ Comparação CV × Vaga
+→ Relatório
+→ Supabase
+→ E-mail
+
+---
+
+### 📬 ATS Contact Management
+
+Responsável pelo gerenciamento inteligente das solicitações enviadas pelos candidatos.
+
+Fluxo resumido:
+
+Formulário
+→ Classificação por IA
+→ Regras de negócio
+→ Supabase
+→ Redis
+→ E-mail
