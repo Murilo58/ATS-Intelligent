@@ -1,7 +1,11 @@
-# ATS Inteligente
-
 <p align="center">
   <img src="images/banner.png" alt="ATS Inteligente" width="100%">
+</p>
+
+<h1 align="center">ATS Inteligente</h1>
+
+<p align="center">
+Plataforma de recrutamento e seleção baseada em Inteligência Artificial.
 </p>
 
 # ATS Inteligente
