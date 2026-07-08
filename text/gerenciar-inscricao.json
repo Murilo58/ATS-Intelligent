@@ -1,0 +1,525 @@
+{
+  "name": "Gerenciar Inscrição",
+  "nodes": [
+    {
+      "parameters": {
+        "inputText": "=Assunto: {{ $json.body.assunto }}\n\nMensagem:\n{{ $json.body.mensagem }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "exclusao_dados",
+              "description": "Solicitação para excluir, remover, apagar ou cancelar o cadastro e os dados pessoais da base de dados conforme LGPD."
+            },
+            {
+              "category": "informacao",
+              "description": "Solicitação de informações sobre o ATS Inteligente, funcionamento da plataforma, análise de currículo, compatibilidade, relatórios ou dúvidas gerais."
+            },
+            {
+              "category": "proposta",
+              "description": "Interesse comercial, parceria, orçamento, contratação, apresentação da solução ou proposta de negócios."
+            },
+            {
+              "category": "Suporte",
+              "description": "Relato de erro, problema técnico, dificuldade para utilizar a plataforma ou falha no envio/análise."
+            },
+            {
+              "category": "outro",
+              "description": "Mensagens que não se enquadram nas categorias anteriores."
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other",
+          "systemPromptTemplate": "Você é um classificador de mensagens do formulário de contato do ATS Inteligente.\n\nAnalise o assunto e a mensagem enviados pelo usuário.\n\nEscolha obrigatoriamente apenas UMA categoria.\n\nCategorias disponíveis:\n- exclusao_dados\n- informacao\n- proposta\n- suporte\n- outro\n\nCaso exista qualquer solicitação relacionada à exclusão, remoção, cancelamento de cadastro, apagamento de dados ou direitos previstos na LGPD, classifique obrigatoriamente como:\n\nexclusao_dados\n\nCaso não exista uma categoria claramente aplicável, utilize:\n\noutro\n\nNunca invente categorias."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -1280,
+        -464
+      ],
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -112
+      ],
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        -480
+      ],
+      "name": "email existe?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "body.nome",
+              "value": "={{ $json.body.nome }}",
+              "type": "string"
+            },
+            {
+              "name": "body.email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "name": "body.assunto",
+              "value": "={{ $json.body.assunto }}",
+              "type": "string"
+            },
+            {
+              "name": "body.mensagem",
+              "value": "={{ $json.body.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1488,
+        -400
+      ],
+      "name": "normalizar"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "candidatos",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -480
+      ],
+      "name": "verificar email",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "candidatos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -528
+      ],
+      "name": "deletar linha"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Cadastro Removido",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Cadastro Removido</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f7fb;padding:30px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.08);\">\n\n<tr>\n<td style=\"background:linear-gradient(90deg,#2563eb,#7c3aed);padding:28px;text-align:center;\">\n<h1 style=\"margin:0;color:#ffffff;font-size:26px;\">\nATS Inteligente\n</h1>\n<p style=\"margin-top:8px;color:#e5e7eb;font-size:15px;\">\nConfirmação de Exclusão de Cadastro\n</p>\n</td>\n</tr>\n\n<tr>\n<td style=\"padding:35px;\">\n\n<p style=\"font-size:16px;color:#1f2937;\">\nOlá, <strong>{{ $json.nome }}</strong>,\n</p>\n\n<p style=\"font-size:15px;color:#4b5563;line-height:1.8;\">\nRecebemos sua solicitação e informamos que o cadastro associado ao e-mail\n<strong>{{ $json.email }}</strong> foi removido com sucesso da base de dados do\n<strong>ATS Inteligente</strong>.\n</p>\n\n<p style=\"font-size:15px;color:#4b5563;line-height:1.8;\">\nA partir deste momento, seus dados pessoais não serão mais utilizados em nossos\nprocessos de análise de currículos e recrutamento.\n</p>\n\n<div style=\"background:#eef6ff;border-left:5px solid #2563eb;padding:18px;border-radius:6px;margin:30px 0;\">\n<p style=\"margin:0;color:#1f2937;font-size:14px;\">\nCaso deseje utilizar novamente a plataforma futuramente, será necessário realizar um novo cadastro e enviar um novo currículo para análise.\n</p>\n</div>\n\n<p style=\"font-size:15px;color:#4b5563;\">\nAgradecemos pela confiança em nossa plataforma.\n</p>\n\n<p style=\"margin-top:35px;color:#1f2937;\">\nAtenciosamente,<br>\n<strong>Equipe ATS Inteligente</strong><br>\nOrizon AI & Projects\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"background:#0f172a;padding:18px;text-align:center;color:#94a3b8;font-size:12px;\">\nEste e-mail foi enviado automaticamente pelo ATS Inteligente.<br><br>\n© 2026 ATS Inteligente • Orizon AI & Projects\n</td>\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        -528
+      ],
+      "name": "avisar usuário"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('normalizar').item.json.body.email }}",
+        "subject": "Cadastro não Encontrado",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"UTF-8\">\n<title>Cadastro Não Localizado</title>\n</head>\n\n<body style=\"margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f7fb;padding:30px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.08);\">\n\n<tr>\n<td style=\"background:linear-gradient(90deg,#2563eb,#7c3aed);padding:28px;text-align:center;\">\n<h1 style=\"margin:0;color:#ffffff;font-size:26px;\">\nATS Inteligente\n</h1>\n\n<p style=\"margin-top:8px;color:#e5e7eb;font-size:15px;\">\nSolicitação de Exclusão de Cadastro\n</p>\n</td>\n</tr>\n\n<tr>\n<td style=\"padding:35px;\">\n\n<p style=\"font-size:16px;color:#1f2937;\">\nOlá,\n</p>\n\n<p style=\"font-size:15px;color:#4b5563;line-height:1.8;\">\nRecebemos sua solicitação de exclusão de dados pessoais.\n</p>\n\n<p style=\"font-size:15px;color:#4b5563;line-height:1.8;\">\nEntretanto, não localizamos nenhum cadastro associado ao e-mail\n<strong>{{ $('normalizar').item.json.body.email }}</strong>\nem nossa base de dados.\n</p>\n\n<div style=\"background:#fff7ed;border-left:5px solid #f59e0b;padding:18px;border-radius:6px;margin:30px 0;\">\n<p style=\"margin:0;color:#1f2937;font-size:14px;\">\nCaso você tenha utilizado outro endereço de e-mail para realizar o cadastro ou o envio do currículo, pedimos que entre em contato novamente informando o e-mail correto para que possamos localizar seu registro.\n</p>\n</div>\n\n<p style=\"font-size:15px;color:#4b5563;line-height:1.8;\">\nSe acreditar que houve algum equívoco ou precisar de suporte, basta responder este e-mail que teremos prazer em ajudá-lo.\n</p>\n\n<p style=\"margin-top:35px;color:#1f2937;\">\nAtenciosamente,<br>\n<strong>Equipe ATS Inteligente</strong><br>\nOrizon AI & Projects\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"background:#0f172a;padding:18px;text-align:center;color:#94a3b8;font-size:12px;\">\nEste e-mail foi enviado automaticamente pelo ATS Inteligente.<br><br>\n© 2026 ATS Inteligente • Orizon AI & Projects\n</td>\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -336
+      ],
+      "name": "usuário não encontrado"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Categoria:\n{{ $json.Categoria }}\n\nNome:\n{{ $('normalizar').item.json.body.nome }}\n\nAssunto:\n{{ $('normalizar').item.json.body.assunto }}\n\nMensagem:\n{{ $('normalizar').item.json.body.mensagem }}",
+        "options": {
+          "systemMessage": "=Você é o assistente de atendimento do ATS Inteligente.\n\nSua função é gerar apenas o conteúdo textual estruturado para um e-mail institucional.\n\nRetorne obrigatoriamente apenas um JSON válido, sem Markdown, sem HTML e sem texto fora do JSON.\n\nFormato obrigatório:\n\n{\n  \"assunto_email\": \"\",\n  \"titulo\": \"\",\n  \"subtitulo\": \"\",\n  \"mensagem\": \"\"\n}\n\nRegras:\n- Responda em português do Brasil.\n- Seja cordial, profissional e objetivo.\n- Não utilize HTML.\n- Não utilize Markdown.\n- Não use ```json.\n- Não invente informações.\n- Não prometa prazos específicos.\n- Use o nome do usuário quando disponível.\n- A mensagem deve ter no máximo 3 parágrafos curtos.\n- Se categoria = informacao, confirme o recebimento e diga que a solicitação será analisada.\n- Se categoria = proposta, agradeça o interesse e diga que retornaremos pelo e-mail informado.\n- Se categoria = suporte, confirme o recebimento do relato e diga que será analisado.\n- Se categoria = outro, agradeça o contato e informe que a mensagem foi recebida.\n- Se categoria = exclusao_dados, confirme apenas que a solicitação foi recebida. Não confirme exclusão definitiva, pois esse fluxo é tratado separadamente.\n\nIMPORTANTE:\n\nA mensagem NÃO deve começar com:\n\n- Olá\n- Prezado\n- Prezada\n- Caro\n- Cara\n\nA saudação será adicionada automaticamente pelo sistema.\n\nTambém NÃO finalize com:\n\n- Atenciosamente\n- Cordialmente\n- Equipe ATS\n- Orizon AI & Projects\n\nA assinatura será adicionada automaticamente pelo sistema.\n\nRetorne somente o conteúdo principal da mensagem."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -704,
+        -176
+      ],
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -736,
+        16
+      ],
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('normalizar').item.json.body.email }}",
+        "sessionTTL": 3600
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.6,
+      "position": [
+        -608,
+        80
+      ],
+      "name": "Redis Chat Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "Categoria",
+              "value": "={{ $prevNode.outputIndex === 0 ? 'exclusao_dados' : $prevNode.outputIndex === 1 ? 'informacao' : $prevNode.outputIndex === 2 ? 'proposta' : $prevNode.outputIndex === 3 ? 'Suporte' : $prevNode.outputIndex === 4 ? 'outro' : 'Other' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        -352
+      ],
+      "name": "mapear_categoria"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output || '';\n\nconst clean = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet dados;\n\ntry {\n  dados = JSON.parse(clean);\n} catch (error) {\n  dados = {\n    assunto_email: 'Solicitação Recebida - ATS Inteligente',\n    titulo: 'Solicitação Recebida',\n    subtitulo: 'Atendimento ATS Inteligente',\n    mensagem: 'Recebemos sua mensagem e ela será analisada pela nossa equipe.'\n  };\n}\n\nconst nome = $('mapear_categoria').item.json.body?.nome || 'Olá';\nconst email = $('mapear_categoria').item.json.body?.email || '';\nconst categoria = $('mapear_categoria').item.json.Categoria || 'outro';\n\nconst cores = {\n  informacao: '#2563EB',\n  proposta: '#7C3AED',\n  suporte: '#F59E0B',\n  exclusao_dados: '#DC2626',\n  outro: '#475569',\n  other: '#475569'\n};\n\nconst labels = {\n  informacao: 'INFORMAÇÃO',\n  proposta: 'PROPOSTA COMERCIAL',\n  suporte: 'SUPORTE',\n  exclusao_dados: 'EXCLUSÃO DE DADOS',\n  outro: 'CONTATO',\n  other: 'CONTATO'\n};\n\nconst cor = cores[categoria] || '#475569';\nconst label = labels[categoria] || 'CONTATO';\n\nconst html_email = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>${dados.assunto_email}</title>\n</head>\n<body style=\"margin:0;padding:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#eef2f7;padding:32px 0;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"650\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,0.12);\">\n          \n          <tr>\n            <td align=\"center\" style=\"padding:42px 32px;background:linear-gradient(135deg,#2563EB,#7C3AED);\">\n              <div style=\"font-size:34px;line-height:1.2;color:#ffffff;font-weight:bold;\">\n                ATS Inteligente\n              </div>\n              <div style=\"margin-top:10px;font-size:16px;line-height:1.5;color:#e0e7ff;\">\n                Plataforma Inteligente para Gestão de Talentos\n              </div>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding:38px 42px;\">\n              <div style=\"display:inline-block;padding:8px 16px;border-radius:999px;background:${cor};color:#ffffff;font-size:12px;font-weight:bold;letter-spacing:0.5px;\">\n                ${label}\n              </div>\n\n              <h2 style=\"margin:26px 0 8px 0;color:#0f172a;font-size:24px;line-height:1.35;\">\n                ${dados.titulo || 'Solicitação recebida'}\n              </h2>\n\n              <p style=\"margin:0 0 28px 0;color:#64748b;font-size:15px;line-height:1.6;\">\n                ${dados.subtitulo || 'Recebemos sua mensagem pelo formulário de contato.'}\n              </p>\n\n              <p style=\"margin:0 0 22px 0;color:#334155;font-size:16px;line-height:1.8;\">\n                Olá <strong>${nome}</strong>,\n              </p>\n\n              <div style=\"color:#334155;font-size:16px;line-height:1.8;margin-bottom:28px;\">\n                ${(dados.mensagem || '').replace(/\\n/g, '<br>')}\n              </div>\n\n              <div style=\"background:#f8fafc;border-left:4px solid ${cor};padding:18px 20px;border-radius:10px;margin:28px 0;\">\n                <p style=\"margin:0;color:#475569;font-size:14px;line-height:1.7;\">\n                  Esta mensagem foi registrada pelo ATS Inteligente. Caso precise complementar alguma informação, responda este e-mail.\n                </p>\n              </div>\n\n              <p style=\"margin:30px 0 0 0;color:#334155;font-size:16px;line-height:1.7;\">\n                Atenciosamente,<br>\n                <strong>Equipe ATS Inteligente</strong>\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td align=\"center\" style=\"background:#0f172a;padding:28px 32px;\">\n              <div style=\"color:#ffffff;font-size:17px;font-weight:bold;\">\n                Orizon AI & Projects\n              </div>\n              <div style=\"margin-top:8px;color:#cbd5e1;font-size:13px;line-height:1.6;\">\n                Automação • Inteligência Artificial • Gestão de Projetos\n              </div>\n              <div style=\"margin-top:18px;\">\n                <a href=\"https://your-domain.com\" style=\"color:#60a5fa;text-decoration:none;font-size:13px;\">\n                  your-domain.com\n                </a>\n              </div>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n`;\n\nreturn [\n  {\n    json: {\n      assunto_email: dados.assunto_email || 'Solicitação Recebida - ATS Inteligente',\n      html_email,\n      email_destino: email,\n      categoria\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        -176
+      ],
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Text Classifier').item.json.body.email }}",
+        "subject": "Solicitação Recebida",
+        "message": "={{ $json.html_email }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        -176
+      ],
+      "name": "outros_assuntos"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "replace-with-your-webhook-path",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        -400
+      ],
+      "name": "contato-usuário"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        128
+      ],
+      "name": "Think"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "verificar email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mapear_categoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email existe?": {
+      "main": [
+        [
+          {
+            "node": "deletar linha",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "usuário não encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalizar": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificar email": {
+      "main": [
+        [
+          {
+            "node": "email existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deletar linha": {
+      "main": [
+        [
+          {
+            "node": "avisar usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usuário não encontrado": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapear_categoria": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "outros_assuntos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contato-usuário": {
+      "main": [
+        [
+          {
+            "node": "normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "publicTemplateSanitized": true
+  },
+  "tags": []
+}
