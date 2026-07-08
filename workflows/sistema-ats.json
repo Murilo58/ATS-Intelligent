@@ -1,0 +1,812 @@
+{
+  "name": "Sistema ATS",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "curriculo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -592
+      ],
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "nome",
+              "value": "={{ $('If').item.json.body.nome }}",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('If').item.json.body.email }}",
+              "type": "string"
+            },
+            {
+              "name": "documento",
+              "value": "={{ $('If').item.json.body.documento }}",
+              "type": "string"
+            },
+            {
+              "name": "descricao_da_vaga",
+              "value": "={{ $('If').item.json.body.descricao_da_vaga }}",
+              "type": "string"
+            },
+            {
+              "name": "arquivo",
+              "value": "={{ $('Webhook').item.binary.curriculo.fileName }}",
+              "type": "string"
+            },
+            {
+              "name": "tipo_de_arquivo",
+              "value": "={{ $('Webhook').item.binary.curriculo.mimeType }}",
+              "type": "string"
+            },
+            {
+              "name": "curriculo",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "name": "modalidade",
+              "value": "={{ $('Webhook').item.json.body.modalidade }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        -336
+      ],
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        -96
+      ],
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $binary.curriculo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -384
+      ],
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Arquivo Ausente",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Currículo não recebido</title>\n</head>\n\n<body style=\"margin:0;padding:0;background:#F3F4F6;font-family:Arial,Helvetica,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#F3F4F6;padding:40px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"650\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.08);\">\n\n<tr>\n<td style=\"background:#DC2626;padding:28px;text-align:center;color:#FFFFFF;\">\n\n<h1 style=\"margin:0;font-size:28px;\">\n⚠️ Currículo não recebido\n</h1>\n\n<p style=\"margin-top:10px;font-size:16px;\">\nNão foi possível iniciar a análise.\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"padding:35px;\">\n\n<p style=\"font-size:16px;color:#374151;line-height:1.8;\">\nOlá,\n</p>\n\n<p style=\"font-size:16px;color:#374151;line-height:1.8;\">\nRecebemos sua solicitação de análise de currículo, porém identificamos que\n<strong>nenhum arquivo PDF foi anexado ao formulário.</strong>\n</p>\n\n<p style=\"font-size:16px;color:#374151;line-height:1.8;\">\nPara que nossa Inteligência Artificial possa realizar a avaliação completa do seu perfil profissional, é necessário anexar o currículo em formato PDF.\n</p>\n\n<div style=\"background:#FEF2F2;border-left:5px solid #DC2626;padding:18px;border-radius:8px;margin:30px 0;\">\n\n<strong style=\"color:#B91C1C;\">Verifique antes de reenviar:</strong>\n\n<ul style=\"margin-top:12px;line-height:1.9;color:#374151;\">\n<li>✔ O currículo está anexado.</li>\n<li>✔ O arquivo está em formato PDF.</li>\n<li>✔ O upload foi concluído corretamente.</li>\n</ul>\n\n</div>\n\n<div style=\"text-align:center;margin-top:35px;\">\n\n<p style=\"font-size:17px;color:#111827;\">\nApós anexar o currículo, basta reenviar o formulário.\n</p>\n\n</div>\n\n<hr style=\"margin:35px 0;border:none;border-top:1px solid #E5E7EB;\">\n\n<p style=\"font-size:13px;color:#6B7280;text-align:center;line-height:1.7;\">\nEste e-mail foi enviado automaticamente pelo sistema de avaliação de currículos com Inteligência Artificial.\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"background:#F9FAFB;padding:18px;text-align:center;\">\n\n<p style=\"margin:0;font-size:12px;color:#9CA3AF;\">\nDesenvolvido com ❤️ utilizando n8n + IA Generativa\n</p>\n\n</td>\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        -160
+      ],
+      "name": "Arquivo Não Recebido"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('If').item.json.body.documento }}",
+        "sessionTTL": 3600
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.6,
+      "position": [
+        560,
+        0
+      ],
+      "name": "Redis Chat Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nome:\n{{ $json.nome }}\n\nEmail:\n{{ $json.email }}\n\nDescrição da vaga:\n{{ $json.descricao_da_vaga }}\n\nModalidade:\n{{ $json.modalidade }}\n\nArquivo:\n{{ $json.arquivo }}\n\nCurrículo:\n\n{{ $json.curriculo }}",
+        "options": {
+          "systemMessage": "=Você é o Agente 1 de um ATS Inteligente.\n\nSua função é analisar a aderência entre o currículo do candidato e a descrição da vaga.\n\nVocê deve avaliar os seguintes 10 pontos:\n1. Área profissional do candidato.\n2. Senioridade estimada.\n3. Compatibilidade com a vaga.\n4. Competências técnicas exigidas e identificadas.\n5. Competências comportamentais exigidas e identificadas.\n6. Experiências relevantes para a vaga.\n7. Lacunas profissionais (o que falta no candidato para a vaga).\n8. Riscos da candidatura.\n9. Score da Vaga (atribua uma nota de 0 a 100 baseado no match).\n10. Recomendação inicial para o RH.\n\nREGRAS DE OUTPUT (SAÍDA):\n- Retorne OBRIGATORIAMENTE em formato JSON válido.\n- Não use Markdown (não adicione ```json ou ``` no início e fim da resposta).\n- Não insira nenhum texto explicativo fora do JSON.\n\nFormato obrigatório do JSON de saída:\n{\n  \"dados_candidato\": {\n    \"nome\": \"{{ $json.nome }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"modalidade\": \"{{ $json.modalidade }}\"\n  },\n  \"descricao_da_vaga\": \"{{ $json.descricao_da_vaga }}\",\n  \"curriculo_original\": \"{{ $json.curriculo }}\",\n  \"analise_match\": {\n    \"area_profissional\": \"\",\n    \"senioridade_estimada\": \"\",\n    \"compatibilidade\": \"\",\n    \"competencias_tecnicas\": [],\n    \"competencias_comportamentais\": [],\n    \"experiencias_relevantes\": [],\n    \"lacunas_profissionais\": [],\n    \"riscos_candidatura\": [],\n    \"score_vaga\": 0,\n    \"recomendacao_inicial\": \"\"\n  }\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        -336
+      ],
+      "name": "Agente Match CV x Vaga"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        -128
+      ],
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.documento }}",
+        "sessionTTL": 3600
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.6,
+      "position": [
+        880,
+        0
+      ],
+      "name": "Redis Chat Memory1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        -48
+      ],
+      "name": "Google Gemini Chat Model2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=Você é o Agente 3 - Relatório Final de um ATS Inteligente.\n\nSua função é consolidar:\n\n1. A análise de aderência do Agente 1.\n2. A auditoria de currículo do Agente 2.\n3. Os dados do candidato.\n4. A descrição da vaga.\n\nVocê deve gerar apenas um JSON estruturado para o n8n.\n\nRegras obrigatórias:\n\n- Não use Markdown.\n- Não use blocos ```json.\n- Não gere HTML.\n- Não escreva explicações.\n- Retorne apenas JSON válido.\n- Não invente informações.\n- Se alguma informação não estiver disponível, use \"Não informado\".\n\nFormato obrigatório:\n\n{\n  \"nome\": \"\",\n  \"email\": \"\",\n  \"descricao_da_vaga\": \"\",\n  \"curriculo\": \"\",\n  \"modalidade\": \"\",\n  \"area_profissional\": \"\",\n  \"senioridade\": \"\",\n  \"score_vaga\": 0,\n  \"score_ats\": 0,\n  \"status_ats\": \"\",\n  \"parecer_final\": \"\",\n  \"pontos_fortes_match\": [],\n  \"lacunas_match\": [],\n  \"pontos_fortes_curriculo\": [],\n  \"melhorias_curriculo\": [],\n  \"recomendacao\": \"\",\n  \"data_candidatura\": \"\",\n  \"versao_analise\": \"1.0\"\n}\n\nCritérios para status_ats:\n\n- 81 a 100: Altamente aderente\n- 65 a 80: Aderente\n- 50 a 64: Parcialmente aderente\n- Abaixo de 50: Baixa aderência\n\nCritérios para recomendacao:\n\n- Score da vaga >= 80 e Score ATS >= 75: Aprovar para entrevista\n- Score da vaga entre 60 e 79: Banco de Talentos\n- Score da vaga abaixo de 60: Não recomendado\n\nO campo \"recomendacao\" deve conter apenas:\n\n- Aprovar para entrevista\n- Banco de Talentos\n- Não recomendado\n\nRetorne somente o JSON final."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1104,
+        -336
+      ],
+      "name": "Agente 3 Relatório Final"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=Você é o Agente 2 - Auditor de Currículo de um ATS Inteligente.\n\n## Objetivo\nSua função é avaliar EXCLUSIVAMENTE a qualidade estrutural e de escrita do currículo do candidato. \nVocê não deve comparar o candidato com a vaga e nem decidir sobre aprovação ou reprovação. Sua análise é isolada sobre o documento em si.\n\nVocê deve avaliar os seguintes critérios:\n1. Estrutura geral do currículo.\n2. Clareza das informações e objetividade.\n3. Organização das experiências profissionais.\n4. Uso de palavras-chave relevantes.\n5. Formação acadêmica e certificações.\n6. Compatibilidade com leitores de sistemas ATS.\n7. Pontos fortes do currículo.\n8. Pontos de melhoria e recomendações práticas.\n\nCalcule um Score ATS de 0 a 100 para a qualidade do currículo.\n\n--------------------------------------------------\nREGRAS OBRIGATÓRIAS DE OUTPUT\n--------------------------------------------------\n- Retorne OBRIGATORIAMENTE em formato JSON válido.\n- Não use Markdown (NÃO adicione os blocos ```json ou ``` no início e fim da resposta).\n- Não insira nenhum texto explicativo ou comentário fora do JSON.\n- Você deve PRESERVAR as informações que vieram do Agente 1 e APENAS PREENCHER o nó \"auditoria_curriculo\" que está vazio abaixo.\n\n--------------------------------------------------\nFORMATO OBRIGATÓRIO DE SAÍDA (JSON)\n--------------------------------------------------\n{\n  \"dados_candidato\": {\n    \"nome\": \"{{ $json.dados_candidato.nome }}\",\n    \"email\": \"{{ $json.dados_candidato.email }}\",\n    \"modalidade\": \"{{ $json.dados_candidato.modalidade }}\"\n  },\n  \"descricao_da_vaga\": \"{{ $json.descricao_da_vaga }}\",\n  \"curriculo_original\": \"{{ $json.curriculo_original }}\",\n  \"analise_match\": {\n    \"area_profissional\": \"{{ $json.analise_match.area_profissional }}\",\n    \"senioridade_estimada\": \"{{ $json.analise_match.senioridade_estimada }}\",\n    \"compatibilidade\": \"{{ $json.analise_match.compatibilidade }}\",\n    \"competencias_tecnicas\": {{ JSON.stringify($json.analise_match.competencias_tecnicas) }},\n    \"competencias_comportamentais\": {{ JSON.stringify($json.analise_match.competencias_comportamentais) }},\n    \"experiencias_relevantes\": {{ JSON.stringify($json.analise_match.experiencias_relevantes) }},\n    \"lacunas_profissionais\": {{ JSON.stringify($json.analise_match.lacunas_profissionais) }},\n    \"riscos_candidatura\": {{ JSON.stringify($json.analise_match.riscos_candidatura) }},\n    \"score_vaga\": {{ $json.analise_match.score_vaga }},\n    \"recomendacao_inicial\": \"{{ $json.analise_match.recomendacao_inicial }}\"\n  },\n  \"auditoria_curriculo\": {\n    \"score_ats\": 0,\n    \"nivel_qualidade_curriculo\": \"\",\n    \"estrutura\": \"\",\n    \"clareza\": \"\",\n    \"organizacao\": \"\",\n    \"palavras_chave\": \"\",\n    \"formacao\": \"\",\n    \"certificacoes\": \"\",\n    \"pontos_fortes_curriculo\": [],\n    \"melhorias_curriculo\": [],\n    \"recomendacoes_praticas\": [],\n    \"parecer_curriculo\": \"\"\n  }\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        -336
+      ],
+      "name": "Agente2 Auditor de Currículo"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $json.output ?? '';\n\nif (typeof raw !== 'string') {\n  raw = JSON.stringify(raw);\n}\n\nraw = raw\n  .replace(/^```json\\s*/i, '')\n  .replace(/^```\\s*/i, '')\n  .replace(/```$/i, '')\n  .trim();\n\n// Garante que será considerado apenas o conteúdo JSON\nconst inicioJson = raw.indexOf('{');\nconst fimJson = raw.lastIndexOf('}');\n\nif (inicioJson !== -1 && fimJson !== -1) {\n  raw = raw.substring(inicioJson, fimJson + 1);\n}\n\n// Remove vírgulas sobrando antes de fechar objeto ou array\nraw = raw.replace(/,\\s*([}\\]])/g, '$1');\n\nlet dados;\n\ntry {\n  dados = JSON.parse(raw);\n} catch (error) {\n  // Fallback para não quebrar o fluxo caso o agente retorne JSON inválido\n  dados = {\n    nome: $json.nome || '',\n    email: $json.email || '',\n    descricao_da_vaga: $json.descricao_da_vaga || '',\n    modalidade: $json.modalidade || '',\n    score_vaga: 0,\n    score_ats: 0,\n    status_ats: 'Não informado',\n    recomendacao: 'Análise gerada com inconsistência no JSON do agente',\n    pontos_fortes_match: [],\n    lacunas_match: [],\n    pontos_fortes_curriculo: [],\n    melhorias_curriculo: [],\n    parecer_final: raw\n  };\n}\n\nconst documento = ($json.documento || '')\n  .replace(/[^a-zA-Z0-9]/g, '')\n  .toUpperCase();\n\nconst lista = (itens) => {\n  if (!Array.isArray(itens) || itens.length === 0) {\n    return '<li>Não informado</li>';\n  }\n\n  return itens.map(item => `<li>${item}</li>`).join('');\n};\n\nconst scoreVaga = Number(dados.score_vaga || 0);\nconst scoreAts = Number(dados.score_ats || 0);\n\nconst html_email = `\n<div style=\"font-family: Arial, sans-serif; background:#f4f6f8; padding:24px;\">\n  <div style=\"max-width:720px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;\">\n\n    <div style=\"background:#0f172a; color:#ffffff; padding:28px;\">\n      <h1 style=\"margin:0; font-size:26px;\">ATS Inteligente</h1>\n      <p style=\"margin:8px 0 0; font-size:15px;\">Relatório Executivo de Triagem de Currículo</p>\n    </div>\n\n    <div style=\"padding:24px;\">\n      <h2 style=\"font-size:18px; color:#111827; margin:0 0 16px;\">Dados do Candidato</h2>\n      <p><strong>Nome:</strong> ${$json.nome || dados.nome || 'Não informado'}</p>\n      <p><strong>E-mail:</strong> ${$json.email || dados.email || 'Não informado'}</p>\n      <p><strong>Documento:</strong> ${documento || 'Não informado'}</p>\n      <p><strong>Modalidade:</strong> ${$json.modalidade || dados.modalidade || 'Não informado'}</p>\n      <p><strong>Área profissional:</strong> ${dados.area_profissional || 'Não informado'}</p>\n      <p><strong>Senioridade:</strong> ${dados.senioridade || 'Não informado'}</p>\n    </div>\n\n    <div style=\"padding:24px; background:#f9fafb; border-top:1px solid #e5e7eb;\">\n      <h2 style=\"font-size:18px; color:#111827; margin:0 0 16px;\">Resultado da Avaliação</h2>\n\n      <p><strong>Score da Vaga:</strong> ${scoreVaga}%</p>\n      <div style=\"background:#e5e7eb; border-radius:999px; height:12px; overflow:hidden; margin-bottom:14px;\">\n        <div style=\"background:#2563eb; width:${scoreVaga}%; height:12px;\"></div>\n      </div>\n\n      <p><strong>Score ATS:</strong> ${scoreAts}%</p>\n      <div style=\"background:#e5e7eb; border-radius:999px; height:12px; overflow:hidden; margin-bottom:14px;\">\n        <div style=\"background:#16a34a; width:${scoreAts}%; height:12px;\"></div>\n      </div>\n\n      <p><strong>Status ATS:</strong> ${dados.status_ats || 'Não informado'}</p>\n      <p><strong>Recomendação:</strong> ${dados.recomendacao || 'Não informado'}</p>\n    </div>\n\n    <div style=\"padding:24px;\">\n      <h2 style=\"font-size:18px; color:#111827;\">Match com a Vaga</h2>\n\n      <h3 style=\"font-size:15px; color:#166534;\">Pontos fortes</h3>\n      <ul>${lista(dados.pontos_fortes_match)}</ul>\n\n      <h3 style=\"font-size:15px; color:#92400e;\">Lacunas identificadas</h3>\n      <ul>${lista(dados.lacunas_match)}</ul>\n    </div>\n\n    <div style=\"padding:24px; background:#f9fafb; border-top:1px solid #e5e7eb;\">\n      <h2 style=\"font-size:18px; color:#111827;\">Auditoria do Currículo</h2>\n\n      <h3 style=\"font-size:15px; color:#166534;\">Pontos fortes do currículo</h3>\n      <ul>${lista(dados.pontos_fortes_curriculo)}</ul>\n\n      <h3 style=\"font-size:15px; color:#92400e;\">Melhorias recomendadas</h3>\n      <ul>${lista(dados.melhorias_curriculo)}</ul>\n    </div>\n\n    <div style=\"padding:24px;\">\n      <h2 style=\"font-size:18px; color:#111827;\">Parecer Final</h2>\n      <p style=\"line-height:1.6;\">${dados.parecer_final || 'Não informado'}</p>\n    </div>\n\n    <div style=\"padding:24px; background:#0f172a; color:#ffffff; text-align:center;\">\n      <p style=\"margin:0; font-size:18px; font-weight:bold;\">${dados.recomendacao || 'Não informado'}</p>\n      <p style=\"margin:8px 0 0; font-size:12px;\">Relatório gerado automaticamente pelo ATS Inteligente</p>\n    </div>\n\n  </div>\n</div>\n`;\n\nreturn [\n  {\n    json: {\n      nome: $json.nome || dados.nome || '',\n      email: $json.email || dados.email || '',\n      documento,\n      descricao_da_vaga: $json.descricao_da_vaga || dados.descricao_da_vaga || '',\n      modalidade: $json.modalidade || dados.modalidade || '',\n      html_email\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -320
+      ],
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "tableId": "candidatos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Merge').item.json.nome }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Merge').item.json.email }}"
+            },
+            {
+              "fieldId": "documento",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.documento }}"
+            },
+            {
+              "fieldId": "descricao_da_vaga",
+              "fieldValue": "={{ $('Merge').item.json.descricao_da_vaga }}"
+            },
+            {
+              "fieldId": "modalidade",
+              "fieldValue": "={{ $('Merge').item.json.modalidade }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        -176
+      ],
+      "name": "Create a row"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.documento }}",
+        "sessionTTL": 3600
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.6,
+      "position": [
+        1200,
+        48
+      ],
+      "name": "Redis Chat Memory2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1648,
+        -320
+      ],
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "nome",
+              "value": "={{ $('Edit Fields').item.json.nome }}",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('Edit Fields').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "name": "documento",
+              "value": "={{ $('Edit Fields').item.json.documento }}",
+              "type": "string"
+            },
+            {
+              "name": "descricao_da_vaga",
+              "value": "={{ $('Edit Fields').item.json.descricao_da_vaga }}",
+              "type": "string"
+            },
+            {
+              "name": "modalidade",
+              "value": "={{ $('Edit Fields').item.json.modalidade }}",
+              "type": "string"
+            },
+            {
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        -336
+      ],
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "candidatos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "documento",
+              "keyValue": "={{ $json.documento }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        -320
+      ],
+      "name": "Get a row",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2192,
+        -320
+      ],
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "candidatos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "documento",
+              "condition": "eq",
+              "keyValue": "={{ $json.documento }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $json.nome }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "descricao_da_vaga",
+              "fieldValue": "={{ $json.descricao_da_vaga }}"
+            },
+            {
+              "fieldId": "modalidade",
+              "fieldValue": "={{ $json.modalidade }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        -480
+      ],
+      "name": "Update a row"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Merge').item.json.email }}",
+        "subject": "Cadastro Encontrado",
+        "message": "=<div style=\"font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:30px;\">\n  <div style=\"max-width:700px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">\n\n    <div style=\"background:#0f172a;padding:28px;text-align:center;\">\n      <h1 style=\"margin:0;color:#ffffff;font-size:28px;\">\n        ATS Inteligente\n      </h1>\n      <p style=\"margin:10px 0 0;color:#d1d5db;font-size:15px;\">\n        Sistema Inteligente de Recrutamento e Seleção\n      </p>\n    </div>\n\n    <div style=\"padding:35px;\">\n\n      <h2 style=\"color:#111827;margin-top:0;\">\n        Olá, {{ $('Merge').item.json.nome }}!\n      </h2>\n\n      <p style=\"font-size:16px;line-height:1.8;color:#374151;\">\n        Identificamos que já existe um cadastro associado ao documento informado em nossa base de candidatos.\n      </p>\n\n      <div style=\"background:#f9fafb;border-left:5px solid #2563eb;padding:18px;margin:25px 0;border-radius:6px;\">\n        <p style=\"margin:0;font-size:15px;color:#374151;\">\n          <strong>Status do cadastro:</strong> Já existente\n        </p>\n\n        <p style=\"margin:12px 0 0;font-size:15px;color:#374151;\">\n          Seu currículo permanece armazenado em nosso banco de talentos e poderá ser considerado para oportunidades compatíveis com seu perfil.\n        </p>\n      </div>\n\n      <p style=\"font-size:16px;line-height:1.8;color:#374151;\">\n        Caso deseje atualizar seu currículo, experiências profissionais ou certificações, recomendamos realizar uma nova submissão utilizando seus dados atualizados. Nosso sistema fará a atualização do seu cadastro automaticamente.\n      </p>\n\n      <div style=\"margin-top:35px;padding:20px;background:#ecfeff;border-radius:8px;\">\n        <strong style=\"color:#0f766e;\">Obrigado pelo seu interesse!</strong>\n\n        <p style=\"margin-top:10px;color:#374151;line-height:1.7;\">\n          Agradecemos por manter seu perfil atualizado. Caso surjam oportunidades alinhadas ao seu perfil profissional, nossa equipe poderá entrar em contato.\n        </p>\n      </div>\n\n    </div>\n\n    <div style=\"background:#0f172a;padding:22px;text-align:center;color:#d1d5db;font-size:13px;\">\n      <strong style=\"color:#ffffff;\">ATS Inteligente</strong><br>\n      Plataforma de Triagem Inteligente de Currículos<br><br>\n\n      Este e-mail foi enviado automaticamente. Não responda esta mensagem.\n    </div>\n\n  </div>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2512,
+        -480
+      ],
+      "name": "Cadastro Encontrado"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code in JavaScript').item.json.email }}",
+        "subject": "=Avaliação Candidato:  {{ $('Code in JavaScript').item.json.nome }}",
+        "message": "={{ $('Code in JavaScript').item.json.html_email }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2496,
+        -176
+      ],
+      "name": "Novo Cadastro"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "replace-with-your-webhook-path",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        -384
+      ],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        -80
+      ],
+      "name": "Think"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        -128
+      ],
+      "name": "Think1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        -128
+      ],
+      "name": "Think2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Agente Match CV x Vaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Match CV x Vaga",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Arquivo Não Recebido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Match CV x Vaga",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Match CV x Vaga": {
+      "main": [
+        [
+          {
+            "node": "Agente2 Auditor de Currículo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente2 Auditor de Currículo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente2 Auditor de Currículo",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente 3 Relatório Final",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente 3 Relatório Final": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente2 Auditor de Currículo": {
+      "main": [
+        [
+          {
+            "node": "Agente 3 Relatório Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Novo Cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente 3 Relatório Final",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Cadastro Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Match CV x Vaga",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente2 Auditor de Currículo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente 3 Relatório Final",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "publicTemplateSanitized": true
+  },
+  "tags": []
+}
