@@ -143,4 +143,17 @@ flowchart TD
     C5 --> G
     D6 --> G
 ```
+## 🛠️ Tecnologias Utilizadas
 
+O ATS Inteligente foi desenvolvido utilizando uma arquitetura baseada em automação, Inteligência Artificial e serviços em nuvem. Cada tecnologia foi escolhida para atender a uma responsabilidade específica dentro da solução.
+
+| Tecnologia | Finalidade |
+|------------|------------|
+| **n8n** | Orquestração dos workflows, integração entre serviços e automação dos processos. |
+| **Google Gemini** | Agentes de Inteligência Artificial responsáveis por classificação, análise, auditoria e geração de respostas. |
+| **Supabase** | Banco de dados para armazenamento e gerenciamento de candidatos, vagas e solicitações. |
+| **Redis** | Gerenciamento de memória conversacional entre os agentes de IA. |
+| **JavaScript** | Tratamento de dados, transformação de informações e geração de templates HTML. |
+| **Gmail API** | Envio automatizado de notificações e relatórios por e-mail. |
+| **Lovable** | Desenvolvimento da interface web do ATS e formulários de interação com candidatos. |
+| **GitHub** | Versionamento do código, documentação técnica e portfólio do projeto. |
