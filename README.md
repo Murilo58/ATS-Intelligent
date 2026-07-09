@@ -235,3 +235,34 @@ Ela participa ativamente dos processos de negócio, realizando atividades como:
 ### Automação como Orquestração
 
 O n8n atua como camada de orquestração entre Inteligência Artificial, banco de dados e serviços externos, permitindo a integração entre todos os componentes da plataforma de forma modular.
+
+## 📁 Estrutura do Projeto
+
+O repositório foi organizado para facilitar a manutenção, reutilização dos workflows e evolução da plataforma.
+
+```text
+ATS-Intelligent/
+│
+├── README.md
+├── LICENSE
+│
+├── workflows/
+│   ├── ats-cv-evaluation-workflow.json
+│   └── ats-contact-management-workflow.json
+│
+├── images/
+│   ├── banner.png
+│   ├── architecture.png
+│   ├── ats-cv-workflow.png
+│   ├── ats-contact-workflow.png
+│   └── email-template.png
+│
+└── docs/
+```
+
+### Organização
+
+- **README.md** → Documentação principal do projeto.
+- **workflows/** → Workflows exportados do n8n (versão sanitizada).
+- **images/** → Diagramas, capturas de tela e recursos visuais utilizados na documentação.
+- **docs/** → Espaço reservado para documentação complementar e futuras evoluções da plataforma.
