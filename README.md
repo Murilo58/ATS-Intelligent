@@ -157,3 +157,13 @@ O ATS Inteligente foi desenvolvido utilizando uma arquitetura baseada em automa�
 | **Gmail API** | Envio automatizado de notificações e relatórios por e-mail. |
 | **Lovable** | Desenvolvimento da interface web do ATS e formulários de interação com candidatos. |
 | **GitHub** | Versionamento do código, documentação técnica e portfólio do projeto. |
+
+### Princípios adotados
+
+Durante o desenvolvimento da plataforma foram adotados alguns princípios de arquitetura:
+
+- Arquitetura modular baseada em workflows independentes.
+- Separação entre regras de negócio, apresentação e Inteligência Artificial.
+- Utilização de agentes especializados para responsabilidades distintas.
+- Reutilização de componentes para facilitar manutenção e evolução da solução.
+- Integração centralizada utilizando n8n como camada de orquestração.
