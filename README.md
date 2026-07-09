@@ -8,8 +8,6 @@
 Plataforma de recrutamento e seleção baseada em Inteligência Artificial.
 </p>
 
-# ATS Inteligente
-
 > Plataforma de recrutamento e seleção baseada em Inteligência Artificial para automatizar a análise de currículos, o gerenciamento de candidatos e o atendimento inteligente.
 
 O **ATS Inteligente** é um projeto desenvolvido para demonstrar como Inteligência Artificial e automação podem transformar o processo de recrutamento e seleção.
