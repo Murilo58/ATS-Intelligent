@@ -167,3 +167,71 @@ Durante o desenvolvimento da plataforma foram adotados alguns princípios de arq
 - Utilização de agentes especializados para responsabilidades distintas.
 - Reutilização de componentes para facilitar manutenção e evolução da solução.
 - Integração centralizada utilizando n8n como camada de orquestração.
+
+## 🏛️ Decisões de Arquitetura
+
+Durante o desenvolvimento do ATS Inteligente foram adotadas decisões arquiteturais com foco em escalabilidade, reutilização de componentes, facilidade de manutenção e separação de responsabilidades.
+
+### Arquitetura Modular
+
+A plataforma foi dividida em workflows independentes, permitindo que cada módulo evolua sem impactar os demais.
+
+Atualmente a solução é composta pelos módulos:
+
+- ATS CV Evaluation
+- ATS Contact Management
+
+Essa abordagem facilita a manutenção e permite a adição de novos módulos no futuro.
+
+---
+
+### Agentes Especializados
+
+Ao invés de concentrar toda a lógica em um único agente de IA, a plataforma utiliza agentes especializados para diferentes responsabilidades.
+
+Essa estratégia proporciona:
+
+- Melhor qualidade das respostas
+- Prompts menores e mais objetivos
+- Facilidade de evolução
+- Menor acoplamento entre funcionalidades
+
+---
+
+### Separação entre IA e Interface
+
+Os agentes de IA são responsáveis apenas pela geração do conteúdo.
+
+A construção do layout dos e-mails é realizada por JavaScript, garantindo uma identidade visual consistente e facilitando futuras alterações de design sem necessidade de modificar os prompts.
+
+---
+
+### Banco de Dados Centralizado
+
+O Supabase foi adotado como camada central de persistência, permitindo:
+
+- Cadastro de candidatos
+- Consulta de informações
+- Atualização de registros
+- Exclusão de dados em conformidade com a LGPD
+
+---
+
+### Inteligência Artificial como Camada de Negócio
+
+A IA não foi utilizada apenas para responder perguntas.
+
+Ela participa ativamente dos processos de negócio, realizando atividades como:
+
+- Classificação de solicitações
+- Avaliação de currículos
+- Comparação entre perfil e vaga
+- Auditoria de informações
+- Geração de relatórios
+- Comunicação automatizada
+
+---
+
+### Automação como Orquestração
+
+O n8n atua como camada de orquestração entre Inteligência Artificial, banco de dados e serviços externos, permitindo a integração entre todos os componentes da plataforma de forma modular.
