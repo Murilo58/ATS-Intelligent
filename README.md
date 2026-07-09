@@ -266,3 +266,39 @@ ATS-Intelligent/
 - **workflows/** → Workflows exportados do n8n (versão sanitizada).
 - **images/** → Diagramas, capturas de tela e recursos visuais utilizados na documentação.
 - **docs/** → Espaço reservado para documentação complementar e futuras evoluções da plataforma.
+
+- ## 🚀 Roadmap
+
+### Versão Atual
+
+- ✅ Avaliação Inteligente de Currículos
+- ✅ Gerenciamento Inteligente de Contato
+- ✅ Classificação por IA
+- ✅ Integração com Supabase
+- ✅ Tratamento LGPD
+- ✅ Templates HTML
+- ✅ Memória Conversacional
+
+---
+
+### Próximas Evoluções
+
+- ⏳ Dashboard Administrativo
+- ⏳ Portal do Recrutador
+- ⏳ Ranking Inteligente de Candidatos
+- ⏳ Agenda de Entrevistas
+- ⏳ Banco de Talentos
+- ⏳ Analytics e Indicadores
+- ⏳ Integração com LinkedIn
+- ⏳ Assistente Virtual para Recrutadores
+
+- ## 👨‍💻 Sobre o Autor
+
+Desenvolvido por **Murilo Costa**.
+
+Especialista em Gestão de Projetos de TI, automação de processos e Inteligência Artificial aplicada.
+
+Especialista em Gestão de Projetos de TI com experiência em automação de processos e Inteligência Artificial aplicada. Atua no desenvolvimento de soluções que integram IA, automação e plataformas digitais para aumentar a eficiência operacional e apoiar iniciativas de transformação digital.
+
+- 💼 LinkedIn: https://linkedin.com/in/murilogcosta
+- 💻 GitHub: https://github.com/Murilo58
