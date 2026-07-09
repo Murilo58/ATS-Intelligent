@@ -55,7 +55,7 @@ Este projeto foi desenvolvido com o objetivo de demonstrar a aplicação prátic
 
 Além da automação operacional, a solução busca oferecer uma experiência mais ágil tanto para candidatos quanto para recrutadores, mantendo uma arquitetura modular preparada para futuras evoluções.
 
-## 🏗️ Arquitetura Geral
+## 🏗️ Arquitetura Simplificada
 
 O ATS Inteligente foi projetado de forma modular, permitindo que diferentes fluxos de automação trabalhem de maneira independente, mas integrados através de uma arquitetura baseada em Inteligência Artificial, banco de dados centralizado e automações desenvolvidas em n8n.
 
@@ -89,3 +89,58 @@ Formulário
 → Supabase
 → Redis
 → E-mail
+
+## 🏗️ Arquitetura Geral
+
+O ATS Inteligente foi estruturado em dois fluxos principais: um para avaliação inteligente de currículos e outro para gerenciamento de contatos, solicitações e LGPD.
+
+```mermaid
+flowchart TD
+    A[Usuário / Candidato] --> B[Portal ATS Inteligente]
+
+    B --> C[Workflow 1: Avaliação de Currículos]
+    B --> D[Workflow 2: Gerenciamento de Contato]
+
+    C --> C1[Upload do Currículo PDF]
+    C1 --> C2[Extração do Conteúdo]
+    C2 --> C3[Agente IA: Match CV x Vaga]
+    C3 --> C4[Agente IA: Auditoria do Currículo]
+    C4 --> C5[Agente IA: Relatório Final]
+    C5 --> C6[Cadastro ou Atualização no Supabase]
+    C6 --> C7[E-mail com Resultado da Análise]
+
+    D --> D1[Formulário de Contato]
+    D1 --> D2[Classificação por IA]
+    D2 --> D3{Tipo de Solicitação}
+
+    D3 --> D4[Informações / Proposta / Suporte]
+    D3 --> D5[Solicitação LGPD]
+
+    D4 --> D6[Agente IA: Resposta Personalizada]
+    D6 --> D7[Template HTML via JavaScript]
+    D7 --> D8[E-mail Automático]
+
+    D5 --> D9[Consulta no Supabase]
+    D9 --> D10{Cadastro Encontrado?}
+    D10 -->|Sim| D11[Exclusão do Cadastro]
+    D10 -->|Não| D12[Notificação de Cadastro Não Localizado]
+
+    D11 --> D13[E-mail de Confirmação]
+    D12 --> D13
+
+    C6 --> E[(Supabase)]
+    D9 --> E
+    D11 --> E
+
+    C3 --> F[Google Gemini]
+    C4 --> F
+    C5 --> F
+    D2 --> F
+    D6 --> F
+
+    C3 --> G[(Redis Memory)]
+    C4 --> G
+    C5 --> G
+    D6 --> G
+```
+
